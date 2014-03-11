@@ -1,3 +1,16 @@
+###
+### Setup script for my own work on Ubuntu 32bit
+###
+### Components this script sets up are:
+### - ssh
+### - Emacs
+### - SBCL, a Common Lisp implementation
+### - Quicklisp, a library manager for Common Lisp
+### - Slime, a Lisp interaction mode for Emacs
+### - Git
+### - cl-pattern, a pattern-matching library for Common Lisp
+###
+
 # Setup ssh
 apt-get install -y ssh
 
@@ -11,8 +24,7 @@ cd
 mkdir -p Lisp
 
 # Setup SBCL binary
-sbcl=0
-if [ $sbcl -eq 1 ] ; then
+if [ ! `which sbcl` ] ; then
   cd
   wget http://prdownloads.sourceforge.net/sbcl/sbcl-1.0.58-x86-linux-binary.tar.bz2
   bzip2 -cd sbcl-1.0.58-x86-linux-binary.tar.bz2 | tar xvf -
@@ -24,9 +36,8 @@ if [ $sbcl -eq 1 ] ; then
 fi
 
 # Setup SBCL source
-sbcl_source=0
-if [ $sbcl_source -eq 1 ] ; then
-  cd
+cd
+if [ ! -e Lisp/sbcl-1.0.58-source ] ; then
   wget http://prdownloads.sourceforge.net/sbcl/sbcl-1.0.58-source.tar.bz2
   bzip2 -cd sbcl-1.0.58-source.tar.bz2 | tar xvf -
   mv sbcl-1.0.58 ~/Lisp/sbcl-1.0.58-source
@@ -34,17 +45,16 @@ if [ $sbcl_source -eq 1 ] ; then
 fi
 
 # Setup Quicklisp
-quicklisp=0
-if [ $quicklisp -eq 1 ] ; then
-  cd
+cd
+if [ ! -e Lisp/quicklisp ] ; then
   wget http://beta.quicklisp.org/quicklisp.lisp
   sbcl --load quicklisp.lisp
   rm quicklisp.lisp
 fi
 
 # Configure .sbclrc
-sbclrc=0
-if [ $sbclrc -eq 1 ] ; then
+cd
+if [ ! -e .sbclrc ] ; then
   echo ";;; Quicklisp shortcut
 (defun :ql (&rest args)
   (apply #'ql:quickload args))
@@ -55,9 +65,8 @@ if [ $sbclrc -eq 1 ] ; then
 fi
 
 # Setup Slime
-slime=0
-if [ $slime -eq 1 ] ; then
-  cd
+cd
+if [ ! -e .emacs.d/ ] ; then
   mkdir ~/.emacs.d
   wget http://common-lisp.net/project/slime/snapshots/slime-current.tgz
   tar xvzf slime-current.tgz
@@ -66,10 +75,15 @@ if [ $slime -eq 1 ] ; then
 fi
 
 # Configure .emacs
-dotemacs=0
-if [ $dotemacs -eq 1 ] ; then
-  cd
-  echo ";; Set SBCL as inferior lisp program and setup SLIME
+cd
+if [ ! -e .emacs ] ; then
+  echo ";; don't make backup files, such as foo~
+(setq-default make-backup-files nil)
+
+;; use spaces to indent lines
+(setq-default indent-tabs-mode nil)
+
+;; set SBCL as inferior lisp program and setup SLIME
 (setq inferior-lisp-program \"sbcl\")
 (add-to-list 'load-path (expand-file-name \"~/.emacs.d/slime\"))
 (require 'slime)
@@ -81,10 +95,9 @@ fi
 apt-get install -y git
 
 # Setup cl-pattern
-cl_pattern=0
-if [ $cl_pattern -eq 1 ] ; then
+cd
+if [ ! -e Lisp/quicklisp/local-projects/cl-pattern ] ; then
   cd ~/Lisp/quicklisp/local-projects
   git clone git://github.com/arielnetworks/cl-pattern.git
   cd
 fi
-
